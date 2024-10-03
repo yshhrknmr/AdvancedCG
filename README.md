@@ -10,7 +10,7 @@
 
 ## 注意事項
 ### Windows
-* もし自分の PC に Visual Studio 2022 がインストールされていない場合は，藤澤先生の講義資料フォルダ(SharePoint)の「[Visual Studio Community インストール方法.pdf](https://o365tsukuba.sharepoint.com/sites/msteams_087e13/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2Fmsteams%5F087e13%2FShared%20Documents%2FGeneral%2Fadvancedcg&p=true&ga=1 "Visual Studio Community インストール方法.pdf")」 を参考にしてインストールしてください．
+* もし自分の PC に Visual Studio 2022 がインストールされていない場合は，藤澤先生の講義資料フォルダ(SharePoint)の「[Visual Studio Community インストール方法.pdf](https://o365tsukuba.sharepoint.com/sites/msteams_087e13/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2Fmsteams%5F087e13%2FShared%20Documents%2FGeneral%2Fadvancedcg&p=true&ga=1 "Visual Studio Community インストール方法.pdf")」 を参考にしてインストールしてください。
 
 ### Mac, Linux (Ubuntu)
 * 上記ソースコード一式は Mac 用 Makefile と Ubuntu 用 Makefile を src ディレクトリに同梱してありますのでそれを使ってください (Mac 用は Makefile_Mac としてあるので適宜ファイル名変更してください)。

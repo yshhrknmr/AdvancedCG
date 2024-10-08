@@ -55,7 +55,8 @@ $ cd Advanced01/src    # 第 1 回の場合
 $ mv Makefile Makefile_Ubuntu    # すでに Ubuntu 用の Makefile があるのでリネーム
 $ mv Makefile_Mac Makefile
 ```
-なお、リネームが面倒臭ければ `make` コマンド時に `-f Makefile_Mac` とファイル名を指定することもできます。 
+なお、リネームが面倒臭ければ `make` コマンド時に `-f Makefile_Mac` とファイル名を指定することもできます。
+
 5. Terminal.app で次のコマンドを実行してください。
 ```
 $ make run

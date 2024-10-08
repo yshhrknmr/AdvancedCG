@@ -61,7 +61,7 @@ $ mv Makefile_Mac Makefile
 ```
 $ make run
 ```
-これで課題のプログラムがコンパイルされて起動するはずです。なお、Mac 版の GLSL のコードは GLSL_Mac というフォルダに入っています。「[Mac でのその他の注意事項]("https://github.com/yshhrknmr/AdvancedCG/tree/main#mac-%E3%81%A7%E3%81%AE%E3%81%9D%E3%81%AE%E4%BB%96%E3%81%AE%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A0%85")」も参照してください。
+これで課題のプログラムがコンパイルされて起動するはずです。なお、Mac 版の GLSL のコードは GLSL_Mac というフォルダに入っています。「[Mac でのその他の注意事項](https://github.com/yshhrknmr/AdvancedCG/tree/main#mac-%E3%81%A7%E3%81%AE%E3%81%9D%E3%81%AE%E4%BB%96%E3%81%AE%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A0%85)」も参照してください。
 
 > [!CAUTION]
 > 第3回では並列処理を行うための OpenMP ライブラリが必要です。

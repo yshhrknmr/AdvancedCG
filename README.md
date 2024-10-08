@@ -70,4 +70,4 @@ $ make run
 $ brew install libomp
 $ brew link libomp --force    # シンボリックリンクの作成
 ```
-あとは上記の手順 4 以降の手順を行ってください。
+あとは上記の手順 4 以降を行ってください。

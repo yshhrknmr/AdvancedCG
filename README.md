@@ -61,7 +61,7 @@ $ mv Makefile_Mac Makefile
 ```
 $ make run
 ```
-これで課題のプログラムがコンパイルされて起動するはずです。
+これで課題のプログラムがコンパイルされて起動するはずです。なお、Mac 版の GLSL のコードは GLSL_Mac というフォルダに入っています。
 
 > [!CAUTION]
 > 第3回では並列処理を行うための OpenMP ライブラリが必要です。
@@ -75,4 +75,4 @@ $ brew link libomp --force    # シンボリックリンクの作成
 あとは上記の手順 4 以降を行ってください。もし M1 CPU よりも古い Mac を使っている場合は、手順 4 の後で `Makefile` 内の `-L/opt/homebrew/opt/libomp/lib` を `-L/opt/local/lib/libomp` に書き換えてください。
 
 #### Mac でのその他の注意事項
-* Mac 版の GLSL のコードは GLSL_Mac というフォルダに入っています。シェーダには #version 130 ではなく #version 150 core を使用しており、テクスチャ画像を参照するための関数は texture2D() ではなく texture() を使ってください。これ以外にもバージョンを変えたことにより使うべき関数を変える必要が出てくるかもしれません。
+* Mac 版の GLSL のコードには #version 130 ではなく #version 150 core を使用しており、テクスチャ画像を参照するための関数は texture2D() ではなく texture() を使ってください。これ以外にもバージョンを変えたことにより使うべき関数を変える必要が出てくるかもしれません。

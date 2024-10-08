@@ -42,8 +42,8 @@ $ brew install devil glfw glew
 ```
 3. パッケージをインストールしただけでは各種パスが正しく設定されていないので、設定を行います。ホームディレクトリ直下の .zshrc ファイルに以下を記述してください。
 ```
-export CPATH=/opt/homebrew/include
-export LIBRARY_PATH=/opt/homebrew/lib
+export CPATH=/opt/homebrew/include    # M1 より古い Mac を使っている場合は CPATH=/opt/local/include
+export LIBRARY_PATH=/opt/homebrew/lib      # M1 より古い Mac を使っている場合は LIBRARY_PATH=/opt/local/lib
 ```
 記述してファイルを保存したら設定を読み込みます。
 ```
@@ -72,8 +72,7 @@ $ make run
 $ brew install libomp
 $ brew link libomp --force    # シンボリックリンクの作成
 ```
-あとは上記の手順 4 以降を行ってください。
+あとは上記の手順 4 以降を行ってください。もし M1 CPU よりも古い Mac を使っている場合は、手順 4 の後で `Makefile` 内の `-L/opt/homebrew/opt/libomp/lib` を `-L/opt/local/lib/libomp` に書き換えてください。
 
 #### Mac でのその他の注意事項
 * Mac 版の GLSL のコードは GLSL_Mac というフォルダに入っています。シェーダには #version 130 ではなく #version 150 core を使用しており、テクスチャ画像を参照するための関数は texture2D() ではなく texture() を使ってください。これ以外にもバージョンを変えたことにより使うべき関数を変える必要が出てくるかもしれません。
-* Mac の M1 CPU 以前の CPU を使っている人は、Makefile の中の `-L` オプションのところを `-L/opt/homebrew/lib` ではなく `-L/opt/local/lib` に変更してください。

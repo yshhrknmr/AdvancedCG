@@ -1,4 +1,4 @@
-# AdvancedCG
+# Advanced CG / アドバンストCG
 筑波大学情報学群情報メディア創成学類・情報科学類の授業「アドバンストCG」の第1回～第4回のレポートのためのベースコード公開用リポジトリです。第5回～第8回については[藤澤先生のリポジトリ](https://github.com/fujis/advancedcg "藤澤先生のリポジトリ")にアクセスしてください。
 
 # 各フォルダについて
@@ -8,9 +8,55 @@
 * vc-x64-lib-common: Visual Studio 共通のライブラリファイル
 * vc-x64-libs: Visual Studio のバージョン別のライブラリファイル
 
-## 注意事項
+## 自分のパソコンで環境構築する方法
 ### Windows
 * もし自分の PC に Visual Studio 2022 がインストールされていない場合は，藤澤先生の講義資料フォルダ(SharePoint)の「[Visual Studio Community インストール方法.pdf](https://o365tsukuba.sharepoint.com/sites/msteams_087e13/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2Fmsteams%5F087e13%2FShared%20Documents%2FGeneral%2Fadvancedcg&p=true&ga=1 "Visual Studio Community インストール方法.pdf")」 を参考にしてインストールしてください。
 
-### Mac, Linux (Ubuntu)
-* 上記ソースコード一式は Mac 用 Makefile と Ubuntu 用 Makefile を src ディレクトリに同梱してありますのでそれを使ってください (Mac 用は Makefile_Mac としてあるので適宜ファイル名変更してください)。
+### Linux (Ubuntu)
+1. Ubuntu のパッケージマネージャ apt で必要なパッケージをインストールします。「パッケージが見つからない」というエラーが出る場合は、
+```
+$ sudo apt-get update --with-missing
+```
+を行う必要があるかもしれません。必要なパッケージのインストールは次のコマンドでできます。
+```
+$ sudo apt install libdevil-dev libglfw3-dev libglew-dev
+```
+2. GitHub レポジトリからダウンロードしたファイル一式のうち、各回のフォルダ (Advanced0*) の src フォルダに移動してください。
+```
+$ cd Advanced01/src   # 1 回目の場合
+```
+3. Makefile をコピーしたディレクトリ内に移動し、次のコマンドを実行してください。
+```
+$ make run
+```
+これで課題のプログラムがコンパイルされて起動するはずです。
+
+### Mac
+1. Terminal.app を起動し、パッケージマネージャ [Homebrew](https://brew.sh/ "Homebrew") をインストールしてください。
+```
+$ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+2. Homebrew で必要なパッケージをインストールします。
+```
+$ brew install devil glfw glew
+```
+3. パッケージをインストールしただけでは各種パスが正しく設定されていないので、設定を行います。ホームディレクトリ直下の .zshrc ファイルに以下を記述してください。
+```
+export CPATH=/opt/homebrew/include
+export LIBRARY_PATH=/opt/homebrew/lib
+```
+記述してファイルを保存したら設定を読み込みます。
+```
+$ source ~/.zshrc
+```
+4. GitHub レポジトリからダウンロードしたファイル一式のうち、各回のフォルダの src フォルダに移動し、同梱の Makefile_Mac を Makefile とリネームしてください。
+```
+$ cd Advanced01/src    # 第 1 回の場合
+$ mv Makefile Makefile_Ubuntu     # すでに Ubuntu 用の Makefile があるのでリネーム
+$ mv Makefile_Mac Makefile
+```
+5. Terminal.app で次のコマンドを実行してください。
+```
+$ make run
+```
+これで課題のプログラムがコンパイルされて起動するはずです。

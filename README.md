@@ -52,7 +52,7 @@ $ source ~/.zshrc
 4. GitHub レポジトリからダウンロードしたファイル一式のうち、各回のフォルダの src フォルダに移動し、同梱の Makefile_Mac を Makefile とリネームしてください。
 ```
 $ cd Advanced01/src    # 第 1 回の場合
-$ mv Makefile Makefile_Ubuntu     # すでに Ubuntu 用の Makefile があるのでリネーム
+$ mv Makefile Makefile_Ubuntu    # すでに Ubuntu 用の Makefile があるのでリネーム
 $ mv Makefile_Mac Makefile
 ```
 5. Terminal.app で次のコマンドを実行してください。
@@ -60,3 +60,13 @@ $ mv Makefile_Mac Makefile
 $ make run
 ```
 これで課題のプログラムがコンパイルされて起動するはずです。
+:::note warn
+第3回では並列処理を行うための OpenMP ライブラリのための設定が必要です。
+:::
+#### 第 3 回の課題で Mac で OpenMP を使うための設定
+上記の Mac の設定に加えて、OpenMP のパッケージをインストールします。
+```
+$ brew install libomp
+$ brew link libomp --force    # シンボリックリンクの作成
+```
+あとは上記の手順 4 以降の手順を行ってください。

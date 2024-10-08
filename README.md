@@ -73,3 +73,7 @@ $ brew install libomp
 $ brew link libomp --force    # シンボリックリンクの作成
 ```
 あとは上記の手順 4 以降を行ってください。
+
+#### Mac でのその他の注意事項
+* Mac 版の GLSL では #version 130 ではなく #version 150 core を使用しており、テクスチャ画像を参照するための関数は texture2D() ではなく texture() を使ってください。これ以外にもバージョンを変えたことにより使うべき関数を変える必要が出てくるかもしれません。
+* Mac の M1 CPU 以前の CPU を使っている人は、Makefile の中の `-L` オプションのところを `-L/opt/homebrew/lib` ではなく `-L/opt/local/lib` に変更してください。

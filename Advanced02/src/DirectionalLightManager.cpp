@@ -23,9 +23,15 @@ void DirectionalLightManager::Init()
 	s_pShader = new GLSLProgramObject();
 
 	PathFinder finder;
+#ifdef __APPLE__
+	finder.addSearchPath("GLSL_Mac");
+	finder.addSearchPath("../GLSL_Mac");
+	finder.addSearchPath("../../GLSL_Mac");
+#else
 	finder.addSearchPath("GLSL");
 	finder.addSearchPath("../GLSL");
 	finder.addSearchPath("../../GLSL");
+#endif
 
 	s_pShader->attachShaderSourceFile(finder.find("arrow.vert").c_str(), GL_VERTEX_SHADER);
 	s_pShader->attachShaderSourceFile(finder.find("arrow.frag").c_str(), GL_FRAGMENT_SHADER);

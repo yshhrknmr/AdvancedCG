@@ -32,7 +32,7 @@ $ make run
 これで課題のプログラムがコンパイルされて起動するはずです。
 
 ### Mac
-1. 開発環境である Xcode をインストールします (VS Code などでも開発できるはずですが以下の説明は Xcode を前提とします)。Xcode は App Store からダウンロードできます。
+1. 開発環境である Xcode をインストールします (※Visual Studio for Mac や Visual Studio Code などでも開発できると思いますが、以下の説明は Xcode を前提とします)。Xcode は App Store からダウンロードできます。
 2. Terminal.app を起動し、パッケージマネージャ [Homebrew](https://brew.sh/) をインストールしてください。
 ```
 $ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"

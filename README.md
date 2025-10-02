@@ -10,7 +10,7 @@
 
 ## 自分のパソコンで環境構築する方法
 ### Windows
-* もし自分の PC に Visual Studio 2022 がインストールされていない場合は，藤澤先生の講義資料フォルダ(SharePoint)の「[Visual Studio Community インストール方法.pdf](https://o365tsukuba.sharepoint.com/sites/msteams_087e13/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2Fmsteams%5F087e13%2FShared%20Documents%2FGeneral%2Fadvancedcg&p=true&ga=1)」 を参考にしてインストールしてください。
+* もし自分の PC に Visual Studio 2022 がインストールされていない場合は，藤澤先生の講義資料フォルダ(SharePoint)の「[Visual Studio Community インストール方法.pdf](https://o365tsukuba.sharepoint.com/sites/msteams_087e13/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2Fmsteams%5F087e13%2FShared%20Documents%2FGeneral%2Fadvancedcg&p=true&ga=1)」 (アクセスできない場合は [こちら](https://drive.google.com/file/d/1ttns73NxB1s7RcrTviIYoe13l_8cBwl7/view?usp=sharing)) を参考にしてインストールしてください。
 
 ### Linux (Ubuntu)
 1. Ubuntu のパッケージマネージャ apt で必要なパッケージをインストールします。「パッケージが見つからない」というエラーが出る場合は、

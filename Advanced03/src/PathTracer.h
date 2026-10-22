@@ -5,6 +5,7 @@
 #include "glm/glm.hpp"
 #include "GLSLProgramObject.h"
 #include <random>
+#include <atomic>
 
 class PathTracer
 {
@@ -17,7 +18,7 @@ public:
 	static int s_NumSamplesPerPixel;
 	static int s_NumSamplesPerUpdate;
 
-	PathTracer() : m_FrameBufferTexID(0), m_RandSrc(12345), m_RandDist(0.f, 1.f), m_pGammaShader(0) {}
+	PathTracer() : m_FrameBufferTexID(0), m_pGammaShader(0), m_isNVIDIADriver(false) {}
 	~PathTracer()
 	{
 		if (m_FrameBufferTexID) glDeleteTextures(1, &m_FrameBufferTexID);
@@ -31,9 +32,6 @@ private:
 	ImageRGBf m_FrameBuffer;
 	GLuint m_FrameBufferTexID;
 
-	std::mt19937 m_RandSrc;
-	std::uniform_real_distribution<float> m_RandDist;
-
 	GLSLProgramObject* m_pGammaShader;
 	bool m_isNVIDIADriver;
 
@@ -44,7 +42,18 @@ private:
 	void updateFrameBufferTexture();
 	void renderIntermediateFrame();
 
-	void calcLocalCoordinateSystem(const glm::vec3& normal, const glm::vec3& inDir, glm::vec3& xLocal, glm::vec3& yLocal, glm::vec3& zLocal) const;
+	// local coordinate system at a hit point: yLocal = normal, xLocal and zLocal span the tangent plane
+	void calcLocalCoordinateSystem(const glm::vec3& normal, const glm::vec3& rayDir, glm::vec3& xLocal, glm::vec3& yLocal, glm::vec3& zLocal) const;
 
-	inline float frand() { return m_RandDist(m_RandSrc); }
+	// uniform random number in [0, 1)
+	// Each thread has its own generator: std::mt19937 must not be shared by the OpenMP threads
+	// in renderScene() (sharing it is a data race).
+	inline float frand()
+	{
+		static std::atomic<unsigned int> s_SeedCounter(12345);
+		thread_local std::mt19937 randSrc(s_SeedCounter++);
+		thread_local std::uniform_real_distribution<float> randDist(0.f, 1.f);
+		const float r = randDist(randSrc);
+		return (r < 1.f) ? r : 0.99999994f;	// some implementations can return 1.0f
+	}
 };

@@ -145,8 +145,9 @@ void PathTracer::initShader()
 
 glm::vec3 PathTracer::traceRec(const Ray& ray, int recursionDepth)
 {
+	// the path is cut off at the maximum depth: its contribution is 0 (not the background color)
 	if (recursionDepth > s_MaxRecursionDepth)
-		return g_Scene.getBackgroundColor(ray);
+		return vec3(0.f);
 
 	const float tEpsilon = 0.01f;
 	const float tInfinity = 1.0e+10f;
@@ -183,15 +184,47 @@ glm::vec3 PathTracer::traceRec(const Ray& ray, int recursionDepth)
 	{
 		// TODO: implement Lambert (diffuse) reflection with BRDF importance sampling
 
+		// HINT: the diffuse coefficient (rho_d in the slides) is
+		//const vec3 kd = ((DiffuseMaterial*)record.m_pMaterial)->getDiffuseCoeff();
+
+		// HINT: Russian roulette: use a scalar probability q (e.g. the max of the RGB components of kd).
+		//       Do not apply it (q = 1) while recursionDepth <= s_MinRecursionDepth.
+		//       When the path is terminated, return vec3(0.f), not the background color.
+		//       When the path continues, divide the result by q.
+
 		// HINT: local coordinate system can be defined using the following function:
 		//vec3 xLocal, yLocal, zLocal;
 		//calcLocalCoordinateSystem(record.m_Normal, ray.getUnitDir(), xLocal, yLocal, zLocal);
+		// yLocal is the normal. With theta measured from the normal and phi the azimuth,
+		// the direction is  sin(theta)*cos(phi)*xLocal + cos(theta)*yLocal + sin(theta)*sin(phi)*zLocal
 
 		return vec3(0.f);
 	}
 	else if (matType == Material::Blinn_Phong_Type)
 	{
 		// TODO: implement Blinn-Phong reflection with BRDF importance sampling
+
+		// HINT: the coefficients and the exponent n in the slides are
+		//const BlinnPhongMaterial* m = (BlinnPhongMaterial*)record.m_pMaterial;
+		//const vec3 kd = m->getDiffuseCoeff();	// rho_d
+		//const vec3 ks = m->getSpecularCoeff();	// rho_s
+		//const float n = m->getShininess();	// exponent n of the Blinn-Phong model (see Lecture 2),
+		//					// NOT recursionDepth
+
+		// HINT: the outgoing direction w_o points from the hit point back to where the ray came from
+		//       (the camera only at the first hit):
+		//const vec3 wo = -ray.getUnitDir();
+
+		// HINT: Russian roulette with one random number xi: diffuse, specular or termination (see the slides),
+		//       using scalar probabilities (e.g. pd = the max of the RGB components of kd, ps = the same for ks).
+		//       Divide the value by the probability of the chosen case.
+		//       While recursionDepth <= s_MinRecursionDepth, do not terminate: choose the diffuse case with
+		//       probability pd / (pd + ps) and the specular case with probability ps / (pd + ps).
+
+		// HINT: for the specular reflection, sample the half vector w_h first. Its theta and phi give w_h
+		//       in the local frame; convert it to world coordinates in the same way as the diffuse direction
+		//       (sin(theta)*cos(phi)*xLocal + cos(theta)*yLocal + sin(theta)*sin(phi)*zLocal).
+		//       Then trace w_i = 2 * dot(wo, w_h) * w_h - wo. If w_i points below the surface, return vec3(0.f).
 
 		return vec3(0.f);
 	}
@@ -201,7 +234,7 @@ glm::vec3 PathTracer::traceRec(const Ray& ray, int recursionDepth)
 		const float russianRouletteProbability = (recursionDepth > s_MinRecursionDepth) ? std::max(specularCoeff.x, std::max(specularCoeff.y, specularCoeff.z)) : 1.f;
 
 		if (frand() >= russianRouletteProbability)
-			return g_Scene.getBackgroundColor(ray);
+			return vec3(0.f);	// terminated by Russian roulette: the contribution is 0
 
 		const vec3 reflectDir = normalize(reflect(ray.getUnitDir(), record.m_Normal));
 	
@@ -216,7 +249,7 @@ glm::vec3 PathTracer::traceRec(const Ray& ray, int recursionDepth)
 		const float russianRouletteProbability = (recursionDepth > s_MinRecursionDepth) ? std::max(specularCoeff.x, std::max(specularCoeff.y, specularCoeff.z)) : 1.f;
 
 		if (frand() >= russianRouletteProbability)
-			return g_Scene.getBackgroundColor(ray);
+			return vec3(0.f);	// terminated by Russian roulette: the contribution is 0
 
 		const float _dot = dot(ray.getUnitDir(), record.m_Normal);
 
@@ -225,15 +258,6 @@ glm::vec3 PathTracer::traceRec(const Ray& ray, int recursionDepth)
 
 		const float eta = ((SpecularRefractionMaterial*)record.m_pMaterial)->getRefractionIndex();
 		const float relativeIndex = isEntering ? 1 / eta : eta;
-
-		// Schlick's Fresnel approximation
-
-		const float R0 = ((eta - 1.f) * (eta - 1.f)) / ((eta + 1.f) * (eta + 1.f));
-
-		const float c = 1.f - fabsf(_dot);
-		const float c2 = c * c;
-		const float Re = R0 + (1 - R0) * c2 * c2 * c;
-		const float Tr = (1.f - Re) * relativeIndex * relativeIndex;
 
 		const vec3 normal = isEntering ? record.m_Normal : -record.m_Normal;
 
@@ -248,6 +272,19 @@ glm::vec3 PathTracer::traceRec(const Ray& ray, int recursionDepth)
 			return weight * incomingRadiance;
 		}
 
+		// Schlick's Fresnel approximation
+		// (the cosine is taken on the air side: the incident angle when entering, the refracted angle when exiting)
+
+		const float R0 = ((eta - 1.f) * (eta - 1.f)) / ((eta + 1.f) * (eta + 1.f));
+
+		const float cosAirSide = isEntering ? fabsf(_dot) : fabsf(dot(refractVec, normal));
+		const float c = 1.f - cosAirSide;
+		const float c2 = c * c;
+		const float Re = R0 + (1 - R0) * c2 * c2 * c;
+		const float Tr = (1.f - Re) * relativeIndex * relativeIndex;
+
+		// Up to depth 2, both the reflected and the refracted rays are traced (the path branches here only)
+		// to reduce noise. Deeper, one of them is chosen by Russian roulette.
 		if (recursionDepth <= 2)
 		{
 			const vec3 incomingRadiance = Re * traceRec(Ray(record.m_HitPos, reflectVec), recursionDepth + 1)
@@ -308,17 +345,18 @@ void PathTracer::renderIntermediateFrame()
 	}
 }
 
-void PathTracer::calcLocalCoordinateSystem(const vec3& normal, const vec3& inDir, vec3& xLocal, vec3& yLocal, vec3& zLocal) const
+// rayDir: direction of the ray that hit the surface (pointing toward the surface, i.e. -w_o)
+void PathTracer::calcLocalCoordinateSystem(const vec3& normal, const vec3& rayDir, vec3& xLocal, vec3& yLocal, vec3& zLocal) const
 {
 #if 0
-	yLocal = dot(normal, inDir) < 0.f ? normal : -normal;
+	yLocal = dot(normal, rayDir) < 0.f ? normal : -normal;
 	xLocal = normalize(cross(fabsf(normal.x) > 0.001f ? vec3(0, 1, 0) : vec3(1, 0, 0), normal));
 	zLocal = cross(xLocal, yLocal);
 #else
 	yLocal = normal;
 
-	if (fabsf(glm::dot(normal, inDir)) < 0.9f)
-		xLocal = glm::normalize(glm::cross(inDir, normal));
+	if (fabsf(glm::dot(normal, rayDir)) < 0.9f)
+		xLocal = glm::normalize(glm::cross(rayDir, normal));
 	else
 		xLocal = glm::normalize((fabsf(normal.y) > 0.1f) ? glm::vec3(normal.y, -normal.x, 0.f) : glm::vec3(normal.z, 0.f, -normal.x));
 

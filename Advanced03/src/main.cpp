@@ -211,7 +211,7 @@ void init()
 			g_Scene.addObject(Sphere::CreateGeometricObject(glm::vec3(1.f, 1.f, 1.f), 1.f, m));
 		}
 
-		// rear right
+		// rear left
 		{
 			DiffuseMaterial* m = DiffuseMaterial::CreateMaterial();
 			m->setDiffuseCoeff(0.5f, 1.f, 0.5f);

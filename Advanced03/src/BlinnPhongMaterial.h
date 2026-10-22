@@ -49,8 +49,8 @@ public:
 	void setDiffuseCoeff(Real r, Real g, Real b) { kd = vec3(r,g,b); }
 
 private:
-	Real shininess; // power of cosine lobe
-	vec3 ks;	// phong
-	vec3 kd;	// diffuse
+	Real shininess; // exponent n of the Blinn-Phong model (cos^n, see Lecture 2); not related to the recursion depth
+	vec3 ks;	// specular coefficient (rho_s in the slides)
+	vec3 kd;	// diffuse coefficient (rho_d in the slides)
 
 };

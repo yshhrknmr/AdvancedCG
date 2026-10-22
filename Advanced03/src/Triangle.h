@@ -33,6 +33,7 @@ public:
 	{
 		m_TexCoords[0] = vec2( 0.f );
 		m_TexCoords[1] = vec2( 0.f );
+		m_TexCoords[2] = vec2( 0.f );
 	}
 
 	Triangle(const Triangle &tri)
@@ -50,6 +51,7 @@ public:
 
 		m_TexCoords[0] = vec2( 0.f );
 		m_TexCoords[1] = vec2( 0.f );
+		m_TexCoords[2] = vec2( 0.f );
 
 		m_pMaterial = m;
 	}

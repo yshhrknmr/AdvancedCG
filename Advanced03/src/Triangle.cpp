@@ -43,7 +43,8 @@ bool Triangle::hit(const Ray &r, Real tmin, Real tmax, HitRecord &record) const
 
 	const float alpha = 1.f - (beta + gamma);
 
-	const vec3 normal = alpha * m_Normals[0] + beta * m_Normals[1] + gamma * m_Normals[2];
+	// interpolated vertex normals are not unit vectors in general
+	const vec3 normal = glm::normalize(alpha * m_Normals[0] + beta * m_Normals[1] + gamma * m_Normals[2]);
 	const vec2 texCoord = alpha * m_TexCoords[0] + beta * m_TexCoords[1] + gamma * m_TexCoords[2];
 
 	record.m_ParamT = t;

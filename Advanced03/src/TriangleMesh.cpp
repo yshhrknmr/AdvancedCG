@@ -1,6 +1,7 @@
 #include "TriangleMesh.h"
 #include <cstdlib>
 #include <array>
+#include <iostream>
 #define FAST_OBJ_IMPLEMENTATION
 #include "fast_obj.h"
 //#include <GL/glut.h>

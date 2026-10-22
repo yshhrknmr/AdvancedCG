@@ -2,6 +2,7 @@
 #include "glm/glm.hpp"
 #include "arcball_camera.h"
 #include <vector>
+#include <iostream>
 #undef _UNICODE
 #include <IL/il.h>
 

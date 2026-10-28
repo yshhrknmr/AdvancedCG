@@ -58,14 +58,14 @@ struct SubdivisionEntry
 	AbstractSubdivision *(*Create)();
 };
 
-#define RegisterSubsidivionScheme(name, className) { name, className::Create }
+#define RegisterSubdivisionScheme(name, className) { name, className::Create }
 
 SubdivisionEntry g_SubdivisionSchemes[] = {
-	RegisterSubsidivionScheme("Loop", LoopSubdivision),
-	RegisterSubsidivionScheme("Catmull-Clark", CatmullClarkSubdivision)
+	RegisterSubdivisionScheme("Loop", LoopSubdivision),
+	RegisterSubdivisionScheme("Catmull-Clark", CatmullClarkSubdivision)
 };
 
-#undef RegisterSubsidivionScheme
+#undef RegisterSubdivisionScheme
 
 const int g_NumSubdivisionEntries = sizeof(g_SubdivisionSchemes) / sizeof(SubdivisionEntry);
 int g_SubdivisionIndex = 0;

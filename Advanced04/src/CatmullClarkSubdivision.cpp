@@ -49,8 +49,10 @@ HalfEdge::Mesh CatmullClarkSubdivision::apply(HalfEdge::Mesh& mesh)
 	}
 
 	// Step 2: create odd (i.e., new) vertices by splitting half edges
+	// NOTE: one odd vertex is added for each edge; except on the boundary, it is NOT at the midpoint of the edge
+	//       (in general, it does not even lie on the edge)
 
-	unordered_map<long, HalfEdge::Vertex*> newEdgeMidpointDict;
+	unordered_map<long, HalfEdge::Vertex*> newEdgeVertexDict;	// key: id of an old half-edge, value: odd vertex for its edge
 	unordered_map<long, pair<HalfEdge::HalfEdge*, HalfEdge::HalfEdge*>> newHalfEdgeDict;
 
 	for (int hi = 0; hi < nOldHalfEdges; ++hi)
@@ -60,29 +62,32 @@ HalfEdge::Mesh CatmullClarkSubdivision::apply(HalfEdge::Mesh& mesh)
 		vec3 startVertexPosition = oldHE->getStartVertex()->position;
 		vec3 endVertexPosition = oldHE->getEndVertex()->position;
 
-		HalfEdge::Vertex* edgeMidpoint = nullptr;
+		HalfEdge::Vertex* edgeVertex = nullptr;
 
 		if (oldHE->pPair == nullptr)	// on boundary
 		{
-			edgeMidpoint = newMesh.addVertex();
-			// TODO: calculate the position of edge midpoint
+			edgeVertex = newMesh.addVertex();
+			// TODO: calculate the position of the odd vertex for this boundary edge
+			// HINT: on the boundary, it is the midpoint of the edge (weights 1/2 and 1/2)
 		}
 		else
 		{
-			auto edgeMidpointIter = newEdgeMidpointDict.find(oldHE->pPair->id); // check if pair has been already registered
+			auto edgeVertexIter = newEdgeVertexDict.find(oldHE->pPair->id); // check if pair has been already registered
 
-			if (edgeMidpointIter == newEdgeMidpointDict.end())
+			if (edgeVertexIter == newEdgeVertexDict.end())
 			{
-				edgeMidpoint = newMesh.addVertex();
-				// TODO: calculate the position of edge midpoint
+				edgeVertex = newMesh.addVertex();
+				// TODO: calculate the position of the odd vertex for this edge
+				// HINT: it is the average of the two end vertices of this edge and the centroids of the two faces sharing this edge;
+				//       the centroid of an old face f was created in Step 1 as newMesh.vertices[nOldVertices + f->id]
 			}
 			else
 			{
-				edgeMidpoint = edgeMidpointIter->second;
+				edgeVertex = edgeVertexIter->second;
 			}
 		}
 
-		newEdgeMidpointDict[oldHE->id] = edgeMidpoint;
+		newEdgeVertexDict[oldHE->id] = edgeVertex;
 
 		auto formerHE = newMesh.addHalfEdge();
 		auto latterHE = newMesh.addHalfEdge();
@@ -94,9 +99,9 @@ HalfEdge::Mesh CatmullClarkSubdivision::apply(HalfEdge::Mesh& mesh)
 		if (evenStartVertex->pHalfEdge == nullptr)
 			evenStartVertex->pHalfEdge = formerHE;
 
-		latterHE->pStartVertex = edgeMidpoint;
-		if (edgeMidpoint->pHalfEdge == nullptr)
-			edgeMidpoint->pHalfEdge = latterHE;
+		latterHE->pStartVertex = edgeVertex;
+		if (edgeVertex->pHalfEdge == nullptr)
+			edgeVertex->pHalfEdge = latterHE;
 
 		newHalfEdgeDict[hi] = make_pair(formerHE, latterHE);
 
@@ -127,6 +132,10 @@ HalfEdge::Mesh CatmullClarkSubdivision::apply(HalfEdge::Mesh& mesh)
 
 		// TODO: calculate the new vertex position
 		// c.f., HalfEdge::Vertex::countValence() in HalfEdgeDataStructure.cpp
+		// HINT: in the formula for polygon meshes on the lecture slides, R is the average of the odd vertices
+		//       (Step 2) for the edges connected to the vertex, and S is the average of the centroids (Step 1)
+		//       of the faces around the vertex; if HalfEdge::Vertex::onBoundary() is true, use only the vertex
+		//       itself (weight 3/4) and its two neighbors on the boundary (weight 1/8 each)
 	}
 
 	// Step 4: set up new faces
@@ -137,7 +146,7 @@ HalfEdge::Mesh CatmullClarkSubdivision::apply(HalfEdge::Mesh& mesh)
 		auto centroidVertex = newMesh.vertices[oldFace->id + nOldVertices];
 
 		// TODO: update the half-edge data structure within each old face
-		// HINT: use the following std::vector to store temporal data and process step by step
+		// HINT: use the following std::vector to store temporary data and process step by step
 		//vector<HalfEdge::HalfEdge*> tmpToCentroidHalfEdges;
 		//vector<HalfEdge::Face*> tmpNewFaces;
 	}
@@ -145,5 +154,5 @@ HalfEdge::Mesh CatmullClarkSubdivision::apply(HalfEdge::Mesh& mesh)
 	cerr << __FUNCTION__ << ": check data consistency" << endl;
 	newMesh.checkDataConsistency();
 
-	return move(newMesh);
+	return newMesh;
 }

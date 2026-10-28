@@ -216,7 +216,7 @@ void PolygonMesh::renderMesh() const
 		for (const auto t : m_FaceIndices[fi].indices)
 		{
 			const int normalIdx = (t.normalIdx == -1) ? t.vertexIdx : t.normalIdx;
-			glNormal3fv(glm::value_ptr(m_VertexNormals[t.normalIdx]));
+			glNormal3fv(glm::value_ptr(m_VertexNormals[normalIdx]));
 			glVertex3fv(glm::value_ptr(m_Vertices[t.vertexIdx]));
 		}
 		glEnd();

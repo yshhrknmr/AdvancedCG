@@ -36,14 +36,16 @@ HalfEdge::Mesh LoopSubdivision::apply(HalfEdge::Mesh& mesh)
 
 	// Step 0: allocate memory for even (i.e., old) vertices
 
-	newMesh.vertices.reserve(nOldFaces + nOldHalfEdges);
+	newMesh.vertices.reserve(nOldVertices + nOldHalfEdges);
 
 	for (int vi = 0; vi < nOldVertices; ++vi)
 		newMesh.addVertex();
 
 	// Step 1: create odd (i.e., new) vertices by splitting half edges
+	// NOTE: one odd vertex is added for each edge; except on the boundary, it is NOT at the midpoint of the edge
+	//       (in general, it does not even lie on the edge)
 
-	unordered_map<long, HalfEdge::Vertex*> newEdgeMidpointDict;
+	unordered_map<long, HalfEdge::Vertex*> newEdgeVertexDict;	// key: id of an old half-edge, value: odd vertex for its edge
 	unordered_map<long, pair<HalfEdge::HalfEdge*, HalfEdge::HalfEdge*>> newHalfEdgeDict;
 
 	for (int hi = 0; hi < nOldHalfEdges; ++hi)
@@ -53,29 +55,32 @@ HalfEdge::Mesh LoopSubdivision::apply(HalfEdge::Mesh& mesh)
 		vec3 startVertexPosition = mesh.vertices[oldHE->pStartVertex->id]->position;
 		vec3 endVertexPosition = mesh.vertices[oldHE->getEndVertex()->id]->position;
 
-		HalfEdge::Vertex* edgeMidpoint = nullptr;
+		HalfEdge::Vertex* edgeVertex = nullptr;
 
 		if (oldHE->pPair == nullptr)	// on boundary
 		{
-			edgeMidpoint = newMesh.addVertex();
-			// TODO: calculate the position of edge midpoint
+			edgeVertex = newMesh.addVertex();
+			// TODO: calculate the position of the odd vertex for this boundary edge
+			// HINT: on the boundary, it is the midpoint of the edge (weights 1/2 and 1/2)
 		}
 		else
 		{
-			auto edgeMidpointIter = newEdgeMidpointDict.find(oldHE->pPair->id); // check if pair has been already registered
+			auto edgeVertexIter = newEdgeVertexDict.find(oldHE->pPair->id); // check if pair has been already registered
 
-			if (edgeMidpointIter == newEdgeMidpointDict.end())
+			if (edgeVertexIter == newEdgeVertexDict.end())
 			{
-				edgeMidpoint = newMesh.addVertex();
-				// TODO: calculate the position of edge midpoint
+				edgeVertex = newMesh.addVertex();
+				// TODO: calculate the position of the odd vertex for this edge
+				// HINT: the weights are 3/8 for each end vertex of this edge and 1/8 for each of the two vertices opposite to this edge
+				//       (one in each of the two triangles sharing this edge)
 			}
 			else
 			{
-				edgeMidpoint = edgeMidpointIter->second;
+				edgeVertex = edgeVertexIter->second;
 			}
 		}
 
-		newEdgeMidpointDict[oldHE->id] = edgeMidpoint; // used in Step 3
+		newEdgeVertexDict[oldHE->id] = edgeVertex; // used in Step 3
 
 		auto formerHE = newMesh.addHalfEdge();
 		auto latterHE = newMesh.addHalfEdge();
@@ -87,9 +92,9 @@ HalfEdge::Mesh LoopSubdivision::apply(HalfEdge::Mesh& mesh)
 		if (evenStartVertex->pHalfEdge == nullptr)
 			evenStartVertex->pHalfEdge = formerHE;
 
-		latterHE->pStartVertex = edgeMidpoint;
-		if (edgeMidpoint->pHalfEdge == nullptr)
-			edgeMidpoint->pHalfEdge = latterHE;
+		latterHE->pStartVertex = edgeVertex;
+		if (edgeVertex->pHalfEdge == nullptr)
+			edgeVertex->pHalfEdge = latterHE;
 
 		newHalfEdgeDict[hi] = make_pair(formerHE, latterHE);
 
@@ -120,6 +125,8 @@ HalfEdge::Mesh LoopSubdivision::apply(HalfEdge::Mesh& mesh)
 
 		// TODO: calculate the new vertex position
 		// c.f., HalfEdge::Vertex::countValence() in HalfEdgeDataStructure.cpp
+		// HINT: if HalfEdge::Vertex::onBoundary() is true, use only the vertex itself (weight 3/4)
+		//       and its two neighbors on the boundary (weight 1/8 each)
 	}
 
 	// Step 3: create new faces
@@ -136,5 +143,5 @@ HalfEdge::Mesh LoopSubdivision::apply(HalfEdge::Mesh& mesh)
 	cerr << __FUNCTION__ << ": check data consistency" << endl;
 	newMesh.checkDataConsistency();
 
-	return move(newMesh);
+	return newMesh;
 }

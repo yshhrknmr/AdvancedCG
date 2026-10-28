@@ -246,123 +246,336 @@ namespace HalfEdge {
 		mesh.setFaces(tmpFaces);
 	}
 
+	namespace
+	{
+		// Mesh::checkDataConsistency() prints at most this number of warnings so that a broken mesh does not flood the console
+		const int MaxPrintedWarnings = 20;
+
+		// true if p is stored in the array at the index given by its id, i.e., p is an element of this mesh
+		template <typename T>
+		bool isElementOf(const T* p, const vector<T*>& array)
+		{
+			return p->id >= 0 && p->id < (long)array.size() && array[p->id] == p;
+		}
+	}
+
 	void Mesh::checkDataConsistency() const
 	{
-		int nInconsistentVertices = 0;
-		for (int vi =0; vi<(int)vertices.size(); ++vi)
+		int nWarnings = 0;
+		auto printWarning = [&nWarnings]() { return nWarnings++ < MaxPrintedWarnings; };
+
+		const int nVertices = (int)vertices.size();
+		const int nHalfEdges = (int)halfEdges.size();
+		const int nFaces = (int)faces.size();
+
+		vector<bool> isInconsistentVertex(nVertices, false);
+		vector<bool> isInconsistentHalfEdge(nHalfEdges, false);
+		vector<bool> isInconsistentFace(nFaces, false);
+
+		// Part 1: each pointer must point to an element of this mesh (only pPair may be null, on the boundary)
+
+		for (int vi = 0; vi < nVertices; ++vi)
 		{
 			auto v = vertices[vi];
-
 			bool isInconsistent = false;
 
-			if (v->id < 0)
+			if (v == nullptr)
 			{
-				cerr << __FUNCTION__ << ": Warning: Vertex[" << vi << "] has a negative id" << endl;
+				if (printWarning()) cerr << __FUNCTION__ << ": Warning: Vertex[" << vi << "] is null" << endl;
+				isInconsistent = true;
+			}
+			else if (v->id != vi)
+			{
+				if (printWarning()) cerr << __FUNCTION__ << ": Warning: Vertex[" << vi << "] has a wrong id (" << v->id << ")" << endl;
 				isInconsistent = true;
 			}
 			else if (v->pHalfEdge == nullptr)
 			{
-				cerr << __FUNCTION__ << ": Warning: " << (*v) << "'s pHalfEdge is null" << endl;
+				if (printWarning()) cerr << __FUNCTION__ << ": Warning: " << (*v) << "'s pHalfEdge is null" << endl;
 				isInconsistent = true;
 			}
-			else if (v->pHalfEdge != halfEdges[v->pHalfEdge->id])
+			else if (!isElementOf(v->pHalfEdge, halfEdges))
 			{
-				cerr << __FUNCTION__ << ": Warning: " << (*v) << "'s pHalfEdge has an invalid address" << endl;
+				if (printWarning()) cerr << __FUNCTION__ << ": Warning: " << (*v) << "'s pHalfEdge has an invalid address" << endl;
 				isInconsistent = true;
 			}
 
-			nInconsistentVertices += isInconsistent;
+			isInconsistentVertex[vi] = isInconsistent;
 		}
 
-		int nInconsistentFaces = 0;
-		for (int fi = 0; fi <(int)faces.size(); ++fi)
+		for (int fi = 0; fi < nFaces; ++fi)
 		{
 			auto f = faces[fi];
 			bool isInconsistent = false;
 
-			if (f->id < 0)
+			if (f == nullptr)
 			{
-				cerr << __FUNCTION__ << ": Warning: Face[" << fi << "] has a negative id" << endl;
+				if (printWarning()) cerr << __FUNCTION__ << ": Warning: Face[" << fi << "] is null" << endl;
+				isInconsistent = true;
+			}
+			else if (f->id != fi)
+			{
+				if (printWarning()) cerr << __FUNCTION__ << ": Warning: Face[" << fi << "] has a wrong id (" << f->id << ")" << endl;
 				isInconsistent = true;
 			}
 			else if (f->pHalfEdge == nullptr)
 			{
-				cerr << __FUNCTION__ << ": Warning: " << (*f) << "'s pHalfEdge is null" << endl;
+				if (printWarning()) cerr << __FUNCTION__ << ": Warning: " << (*f) << "'s pHalfEdge is null" << endl;
 				isInconsistent = true;
 			}
-			else if (f->pHalfEdge != halfEdges[f->pHalfEdge->id])
+			else if (!isElementOf(f->pHalfEdge, halfEdges))
 			{
-				cerr << __FUNCTION__ << ": Warning: " << (*f) << "'s pHalfEdge has an invalid address" << endl;
+				if (printWarning()) cerr << __FUNCTION__ << ": Warning: " << (*f) << "'s pHalfEdge has an invalid address" << endl;
 				isInconsistent = true;
 			}
 
-			nInconsistentFaces += isInconsistent;
+			isInconsistentFace[fi] = isInconsistent;
 		}
 
-		int nInconsistentHalfEdges = 0;
-		for (int hi = 0; hi<(int)halfEdges.size(); ++hi)
+		for (int hi = 0; hi < nHalfEdges; ++hi)
 		{
 			auto he = halfEdges[hi];
 			bool isInconsistent = false;
 
-			if (he->id < 0)
+			if (he == nullptr)
 			{
-				cerr << __FUNCTION__ << ": Warning: HalfEdge[" << hi << "] has a negative id" << endl;
+				if (printWarning()) cerr << __FUNCTION__ << ": Warning: HalfEdge[" << hi << "] is null" << endl;
+				isInconsistentHalfEdge[hi] = true;
+				continue;
+			}
+
+			if (he->id != hi)
+			{
+				if (printWarning()) cerr << __FUNCTION__ << ": Warning: HalfEdge[" << hi << "] has a wrong id (" << he->id << ")" << endl;
 				isInconsistent = true;
 			}
-			else if (he->pStartVertex == nullptr)
+
+			if (he->pStartVertex == nullptr)
 			{
-				cerr << __FUNCTION__ << ": Warning: " << (*he) << "'s pStartVertex is null" << endl;
+				if (printWarning()) cerr << __FUNCTION__ << ": Warning: " << (*he) << "'s pStartVertex is null" << endl;
 				isInconsistent = true;
 			}
-			else if (he->pStartVertex != vertices[he->pStartVertex->id])
+			else if (!isElementOf(he->pStartVertex, vertices))
 			{
-				cerr << __FUNCTION__ << ": Warning: " << (*he) << "'s pStartVertex has an invalid address" << endl;
+				if (printWarning()) cerr << __FUNCTION__ << ": Warning: " << (*he) << "'s pStartVertex has an invalid address" << endl;
 				isInconsistent = true;
 			}
 
 			if (he->pNext == nullptr)
 			{
-				cerr << __FUNCTION__ << ": Warning: " << (*he) << "'s pNext is null" << endl;
+				if (printWarning()) cerr << __FUNCTION__ << ": Warning: " << (*he) << "'s pNext is null" << endl;
 				isInconsistent = true;
 			}
-			else if (he->pNext != halfEdges[he->pNext->id])
+			else if (!isElementOf(he->pNext, halfEdges))
 			{
-				cerr << __FUNCTION__ << ": Warning: " << (*he) << "'s pNext has an invalid address" << endl;
+				if (printWarning()) cerr << __FUNCTION__ << ": Warning: " << (*he) << "'s pNext has an invalid address" << endl;
 				isInconsistent = true;
 			}
 
 			if (he->pPrev == nullptr)
 			{
-				cerr << __FUNCTION__ << ": Warning: " << (*he) << "'s pPrev is null" << endl;
+				if (printWarning()) cerr << __FUNCTION__ << ": Warning: " << (*he) << "'s pPrev is null" << endl;
 				isInconsistent = true;
 			}
-			else if (he->pPrev != halfEdges[he->pPrev->id])
+			else if (!isElementOf(he->pPrev, halfEdges))
 			{
-				cerr << __FUNCTION__ << ": Warning: " << (*he) << "'s pPrev has an invalid address" << endl;
+				if (printWarning()) cerr << __FUNCTION__ << ": Warning: " << (*he) << "'s pPrev has an invalid address" << endl;
 				isInconsistent = true;
 			}
 
-			if (he->pPair != nullptr && he->pPair != halfEdges[he->pPair->id])
+			if (he->pPair != nullptr && !isElementOf(he->pPair, halfEdges))
 			{
-				cerr << __FUNCTION__ << ": Warning: " << (*he) << "'s pPair has an invalid address" << endl;
+				if (printWarning()) cerr << __FUNCTION__ << ": Warning: " << (*he) << "'s pPair has an invalid address" << endl;
 				isInconsistent = true;
 			}
 
 			if (he->pFace == nullptr)
 			{
-				cerr << __FUNCTION__ << ": Warning: " << (*he) << "'s pFace is null" << endl;
+				if (printWarning()) cerr << __FUNCTION__ << ": Warning: " << (*he) << "'s pFace is null" << endl;
 				isInconsistent = true;
 			}
-			else if (he->pFace != faces[he->pFace->id])
-			//if (he->pFace != nullptr && he->pFace != faces[he->pFace->id])
+			else if (!isElementOf(he->pFace, faces))
 			{
-				cerr << __FUNCTION__ << ": Warning: " << (*he) << "'s pFace has an invalid address" << endl;
+				if (printWarning()) cerr << __FUNCTION__ << ": Warning: " << (*he) << "'s pFace has an invalid address" << endl;
 				isInconsistent = true;
 			}
 
-			nInconsistentHalfEdges += isInconsistent;
+			isInconsistentHalfEdge[hi] = isInconsistent;
 		}
+
+		// Part 2: the pointers must be consistent with each other
+		// (only the elements that passed Part 1 are checked, so that broken pointers are never followed)
+
+		vector<bool> hasValidPointers(nHalfEdges);
+		for (int hi = 0; hi < nHalfEdges; ++hi)
+			hasValidPointers[hi] = !isInconsistentHalfEdge[hi];
+
+		// a vertex's pHalfEdge must start from the vertex
+
+		for (int vi = 0; vi < nVertices; ++vi)
+		{
+			if (isInconsistentVertex[vi])
+				continue;
+
+			auto v = vertices[vi];
+
+			if (v->pHalfEdge->pStartVertex != v)
+			{
+				if (printWarning()) cerr << __FUNCTION__ << ": Warning: " << (*v) << "'s pHalfEdge does not start from the vertex" << endl;
+				isInconsistentVertex[vi] = true;
+			}
+		}
+
+		// pNext, pPrev, and pPair of a half-edge must point back to it, and the pair must connect the same two vertices in the opposite direction
+
+		auto edgeKey = [nVertices](long long startVertexID, long long endVertexID) { return startVertexID * (long long)nVertices + endVertexID; };
+		unordered_map<long long, int> halfEdgeDict;	// key: edgeKey(start vertex id, end vertex id), value: half-edge id
+		halfEdgeDict.reserve(nHalfEdges);
+
+		for (int hi = 0; hi < nHalfEdges; ++hi)
+		{
+			if (!hasValidPointers[hi])
+				continue;
+
+			auto he = halfEdges[hi];
+			bool isInconsistent = false;
+
+			if (he->pNext->pPrev != he)
+			{
+				if (printWarning()) cerr << __FUNCTION__ << ": Warning: " << (*he) << "'s pNext->pPrev is not the half-edge itself" << endl;
+				isInconsistent = true;
+			}
+
+			if (he->pPrev->pNext != he)
+			{
+				if (printWarning()) cerr << __FUNCTION__ << ": Warning: " << (*he) << "'s pPrev->pNext is not the half-edge itself" << endl;
+				isInconsistent = true;
+			}
+
+			if (he->pNext->pFace != he->pFace)
+			{
+				if (printWarning()) cerr << __FUNCTION__ << ": Warning: " << (*he) << " and its pNext belong to different faces" << endl;
+				isInconsistent = true;
+			}
+
+			if (he->pPair != nullptr)
+			{
+				if (he->pPair->pPair != he)
+				{
+					if (printWarning()) cerr << __FUNCTION__ << ": Warning: " << (*he) << "'s pPair->pPair is not the half-edge itself" << endl;
+					isInconsistent = true;
+				}
+				else if (hasValidPointers[he->pPair->id] &&
+					(he->pPair->pStartVertex != he->pNext->pStartVertex || he->pPair->pNext->pStartVertex != he->pStartVertex))
+				{
+					if (printWarning()) cerr << __FUNCTION__ << ": Warning: " << (*he) << " and its pPair " << (*he->pPair) << " do not connect the same two vertices in opposite directions" << endl;
+					isInconsistent = true;
+				}
+			}
+
+			if (hasValidPointers[he->pNext->id])
+			{
+				if (he->pNext->pStartVertex == he->pStartVertex)
+				{
+					if (printWarning()) cerr << __FUNCTION__ << ": Warning: " << (*he) << " starts and ends at the same vertex" << endl;
+					isInconsistent = true;
+				}
+
+				auto result = halfEdgeDict.emplace(edgeKey(he->pStartVertex->id, he->pNext->pStartVertex->id), hi);
+				if (!result.second)
+				{
+					if (printWarning()) cerr << __FUNCTION__ << ": Warning: " << (*he) << " and " << (*halfEdges[result.first->second]) << " have the same start and end vertices" << endl;
+					isInconsistent = true;
+				}
+			}
+
+			if (isInconsistent)
+				isInconsistentHalfEdge[hi] = true;
+		}
+
+		// a half-edge must have a pair if there is a half-edge in the opposite direction
+
+		for (int hi = 0; hi < nHalfEdges; ++hi)
+		{
+			auto he = halfEdges[hi];
+
+			if (!hasValidPointers[hi] || !hasValidPointers[he->pNext->id] || he->pPair != nullptr)
+				continue;
+
+			auto iter = halfEdgeDict.find(edgeKey(he->pNext->pStartVertex->id, he->pStartVertex->id));
+			if (iter != halfEdgeDict.end())
+			{
+				if (printWarning()) cerr << __FUNCTION__ << ": Warning: " << (*he) << "'s pPair is null although " << (*halfEdges[iter->second]) << " runs in the opposite direction" << endl;
+				isInconsistentHalfEdge[hi] = true;
+			}
+		}
+
+		// following pNext from a face's pHalfEdge must come back to it, and each half-edge must be in the loop of exactly one face
+
+		vector<int> loopFaceID(nHalfEdges, -1);	// id of the face whose loop contains each half-edge
+
+		for (int fi = 0; fi < nFaces; ++fi)
+		{
+			if (isInconsistentFace[fi])
+				continue;
+
+			auto f = faces[fi];
+			auto he = f->pHalfEdge;
+
+			do
+			{
+				if (!hasValidPointers[he->id])	// already reported in Part 1
+				{
+					isInconsistentFace[fi] = true;
+					break;
+				}
+
+				if (loopFaceID[he->id] != -1)
+				{
+					if (loopFaceID[he->id] == fi)
+					{
+						if (printWarning()) cerr << __FUNCTION__ << ": Warning: following pNext from " << (*f) << "'s pHalfEdge does not come back to it" << endl;
+					}
+					else
+					{
+						if (printWarning()) cerr << __FUNCTION__ << ": Warning: " << (*he) << " is in the loops of both " << (*faces[loopFaceID[he->id]]) << " and " << (*f) << endl;
+					}
+					isInconsistentFace[fi] = true;
+					isInconsistentHalfEdge[he->id] = true;
+					break;
+				}
+
+				loopFaceID[he->id] = fi;
+
+				if (he->pFace != f)
+				{
+					if (printWarning()) cerr << __FUNCTION__ << ": Warning: " << (*he) << " is in the loop of " << (*f) << " but its pFace is " << (*he->pFace) << endl;
+					isInconsistentFace[fi] = true;
+					isInconsistentHalfEdge[he->id] = true;
+				}
+
+				he = he->pNext;
+			} while (he != f->pHalfEdge);
+		}
+
+		for (int hi = 0; hi < nHalfEdges; ++hi)
+		{
+			if (hasValidPointers[hi] && loopFaceID[hi] == -1)
+			{
+				if (printWarning()) cerr << __FUNCTION__ << ": Warning: " << (*halfEdges[hi]) << " is not in the loop of any face" << endl;
+				isInconsistentHalfEdge[hi] = true;
+			}
+		}
+
+		// summary
+
+		int nInconsistentVertices = 0, nInconsistentHalfEdges = 0, nInconsistentFaces = 0;
+		for (bool b : isInconsistentVertex) nInconsistentVertices += b;
+		for (bool b : isInconsistentHalfEdge) nInconsistentHalfEdges += b;
+		for (bool b : isInconsistentFace) nInconsistentFaces += b;
+
+		if (nWarnings > MaxPrintedWarnings)
+			cerr << __FUNCTION__ << ": " << (nWarnings - MaxPrintedWarnings) << " more warnings are not printed" << endl;
 
 		cerr << __FUNCTION__ << ": inconsistent # verts = " << nInconsistentVertices << "/" << vertices.size()
 			<< ", # half edges = " << nInconsistentHalfEdges << "/" << halfEdges.size()
@@ -383,7 +596,10 @@ namespace HalfEdge {
 
 	ostream& operator<<(ostream& stream, const HalfEdge& he)
 	{
-		stream << "HalfEdge[id=" << he.id << ",startVertex=" << he.pStartVertex->id << ",endVertex=" << he.pNext->pStartVertex->id << "]";
+		// -1 for a missing vertex, so that a broken half-edge can also be printed
+		const long startVertexID = (he.pStartVertex != nullptr) ? he.pStartVertex->id : -1;
+		const long endVertexID = (he.pNext != nullptr && he.pNext->pStartVertex != nullptr) ? he.pNext->pStartVertex->id : -1;
+		stream << "HalfEdge[id=" << he.id << ",startVertex=" << startVertexID << ",endVertex=" << endVertexID << "]";
 		return stream;
 	}
 

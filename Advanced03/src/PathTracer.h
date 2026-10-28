@@ -28,6 +28,12 @@ public:
 	void renderScene();
 	void renderFrame();
 
+	// true if renderScene() has been called at least once
+	bool hasResult() const { return m_FrameBufferTexID != 0; }
+
+	// save the path traced result; *.hdr is saved in linear float, others are gamma-corrected 8-bit
+	bool saveImage(const char* filename) const;
+
 private:
 	ImageRGBf m_FrameBuffer;
 	GLuint m_FrameBufferTexID;

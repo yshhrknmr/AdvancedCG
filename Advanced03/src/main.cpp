@@ -345,6 +345,16 @@ int main() {
 				g_PathTracer.renderScene();
 			}
 
+			if (ImGui::Button("Save Image") && g_PathTracer.hasResult())
+			{
+				char const* lFilterPatterns[] = { "*.png", "*.jpg", "*.bmp", "*.hdr" };
+				const char* lTheSaveFileName = tinyfd_saveFileDialog(
+					"Saving the path traced result", "result.png", 4, lFilterPatterns, "Image (*.png;*.jpg;*.bmp;*.hdr)");
+
+				if (lTheSaveFileName)
+					g_PathTracer.saveImage(lTheSaveFileName);
+			}
+
 			ImGui::Checkbox("Display Path Traced Result", &g_DisplayPathTracedResult);
 
 			ImGui::SliderFloat("Gamma Correction", &PathTracer::s_Gamma, 0.001f, 5.f);

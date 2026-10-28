@@ -6,6 +6,12 @@
 #include "HitRecord.h"
 #include <iostream>
 #include <chrono>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <cctype>
+#undef _UNICODE
+#include <IL/il.h>
 
 #include "DiffuseMaterial.h"
 #include "BlinnPhongMaterial.h"
@@ -75,6 +81,62 @@ void PathTracer::renderScene()
 		const auto elapsed = chrono::duration_cast<chrono::milliseconds>(tNow - tStart).count() / 1000.f;
 		cerr << __FUNCTION__ << ": " << nNewSamplesDone << "/" << s_NumSamplesPerPixel << " samples (" << elapsed << " sec)" << endl;
 	}
+}
+
+bool PathTracer::saveImage(const char* filename) const
+{
+	if (!hasResult() || !filename) return false;
+
+	const int w = m_FrameBuffer.getWidth();
+	const int h = m_FrameBuffer.getHeight();
+
+	string ext = filename;
+	const size_t dotPos = ext.find_last_of('.');
+	ext = (dotPos == string::npos) ? "" : ext.substr(dotPos + 1);
+	std::transform(ext.begin(), ext.end(), ext.begin(), [](unsigned char c) { return (char)std::tolower(c); });
+
+	ILuint imgName;
+	ilGenImages(1, &imgName);
+	ilBindImage(imgName);
+
+	// m_FrameBuffer(x, 0) is the bottom row
+	ilEnable(IL_ORIGIN_SET);
+	ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
+	ilEnable(IL_FILE_OVERWRITE);
+
+	ILboolean ok;
+
+	if (ext == "hdr")
+	{
+		// linear radiance, no gamma correction
+		ok = ilTexImage(w, h, 1, 3, IL_RGB, IL_FLOAT, (void*)m_FrameBuffer.getData());
+	}
+	else
+	{
+		// apply the same gamma correction as the display shader
+		vector<unsigned char> pixels(w * h * 3);
+		const vec3* src = m_FrameBuffer.getData();
+
+		for (int i = 0; i < w * h; ++i)
+		{
+			const vec3 c = glm::pow(glm::clamp(src[i], 0.f, 1.f), vec3(1.f / s_Gamma));
+			for (int k = 0; k < 3; ++k)
+				pixels[3 * i + k] = (unsigned char)(c[k] * 255.f + 0.5f);
+		}
+
+		ok = ilTexImage(w, h, 1, 3, IL_RGB, IL_UNSIGNED_BYTE, pixels.data());
+	}
+
+	if (ok) ok = ilSaveImage(filename);
+
+	ilDeleteImages(1, &imgName);
+
+	if (ok)
+		cerr << __FUNCTION__ << ": saved " << filename << " (" << w << "x" << h << ")" << endl;
+	else
+		cerr << __FUNCTION__ << ": Error: cannot save " << filename << endl;
+
+	return ok == IL_TRUE;
 }
 
 void PathTracer::renderFrame()

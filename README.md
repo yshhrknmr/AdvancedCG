@@ -77,3 +77,10 @@ $ brew link libomp --force    # シンボリックリンクの作成
 
 #### Mac でのその他の注意事項
 * Mac 版の GLSL のコードには #version 130 ではなく #version 150 core を使用しており、テクスチャ画像を参照するための関数は texture2D() ではなく texture() を使ってください。これ以外にもバージョンを変えたことにより使うべき関数を変える必要が出てくるかもしれません。
+* 中央ボタンのないマウスやトラックパッドでは、Shift キーを押しながら左ドラッグするとズームできます。
+
+### Visual Studio Code でのビルド
+各回のフォルダ (Advanced01 など) を Visual Studio Code で開き、C/C++ 拡張機能をインストールしてください。Ctrl+Shift+B (Mac では Cmd+Shift+B) でビルド、F5 でビルドして実行できます。
+* Windows では Visual Studio 2022 または Build Tools for Visual Studio 2022 (C++ によるデスクトップ開発) の MSBuild を使って Release|x64 構成でビルドします。
+* Mac では src フォルダの Makefile_Mac、Linux では Makefile を使ってビルドします。
+* Windows で Visual Studio 2022 / Visual Studio Code のどちらからビルドしても、必要な DLL (glew32.dll, DevIL.dll, ILU.dll, ILUT.dll, glfw3.dll) は実行ファイルと同じフォルダ (x64/Release など) に自動でコピーされます。

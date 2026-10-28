@@ -231,7 +231,15 @@ void Scene04PseudoNormal::Cursor(GLFWwindow* window, double xpos, double ypos)
 
 	glm::vec2 currPos(xpos / s_WindowWidth, (s_WindowHeight - ypos) / s_WindowHeight);
 
-	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+	// Shift + left drag also zooms (for Macs without a middle button)
+	const bool shiftPressed = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ||
+		glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS;
+
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && shiftPressed)
+	{
+		s_Camera.zoom(currPos.y - s_PrevMouse.y);
+	}
+	else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 	{
 		s_Camera.rotate(s_PrevMouse, currPos);
 	}

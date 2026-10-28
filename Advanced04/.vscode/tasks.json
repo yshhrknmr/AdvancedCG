@@ -1,0 +1,97 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "type": "shell",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "windows": {
+                "command": "powershell",
+                "args": [
+                    "-NoProfile",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    "${workspaceFolder}/../tools/vscode_msbuild.ps1",
+                    "-Project",
+                    "${workspaceFolder}/Advanced04.vcxproj",
+                    "-Configuration",
+                    "Release"
+                ],
+                "problemMatcher": [
+                    "$msCompile"
+                ]
+            },
+            "osx": {
+                "command": "make",
+                "args": [
+                    "-C",
+                    "${workspaceFolder}/src",
+                    "-f",
+                    "Makefile_Mac"
+                ],
+                "problemMatcher": [
+                    "$gcc"
+                ]
+            },
+            "linux": {
+                "command": "make",
+                "args": [
+                    "-C",
+                    "${workspaceFolder}/src",
+                    "-f",
+                    "Makefile"
+                ],
+                "problemMatcher": [
+                    "$gcc"
+                ]
+            }
+        },
+        {
+            "label": "clean",
+            "type": "shell",
+            "windows": {
+                "command": "powershell",
+                "args": [
+                    "-NoProfile",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    "${workspaceFolder}/../tools/vscode_msbuild.ps1",
+                    "-Project",
+                    "${workspaceFolder}/Advanced04.vcxproj",
+                    "-Configuration",
+                    "Release",
+                    "-Target",
+                    "Clean"
+                ],
+                "problemMatcher": []
+            },
+            "osx": {
+                "command": "make",
+                "args": [
+                    "-C",
+                    "${workspaceFolder}/src",
+                    "-f",
+                    "Makefile_Mac",
+                    "clean"
+                ],
+                "problemMatcher": []
+            },
+            "linux": {
+                "command": "make",
+                "args": [
+                    "-C",
+                    "${workspaceFolder}/src",
+                    "-f",
+                    "Makefile",
+                    "clean"
+                ],
+                "problemMatcher": []
+            }
+        }
+    ]
+}

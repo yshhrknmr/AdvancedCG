@@ -89,7 +89,15 @@ void cursorPosCallback(GLFWwindow* window, double xpos, double ypos)
 
 	glm::vec2 currPos(xpos / g_WindowWidth, (g_WindowHeight - ypos) / g_WindowHeight);
 
-	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+	// Shift + left drag also zooms (for Macs without a middle button)
+	const bool shiftPressed = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ||
+		glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS;
+
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && shiftPressed)
+	{
+		g_Camera.zoom(currPos.y - g_PrevMouse.y);
+	}
+	else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 	{
 		g_Camera.rotate(g_PrevMouse, currPos);
 	}

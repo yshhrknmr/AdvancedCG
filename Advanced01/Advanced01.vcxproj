@@ -129,6 +129,13 @@
       <AdditionalDependencies>opengl32.lib;glfw3dll.lib;glew32.lib;ILU.lib;ILUT.lib;DevIL.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Platform)'=='x64'">
+    <PostBuildEvent>
+      <Command>xcopy /y /d /q "$(ProjectDir)..\vc-x64-lib-common\*.dll" "$(OutDir)"
+xcopy /y /d /q "$(ProjectDir)..\vc-x64-libs\glfw-3.3.8-lib-vc2022\*.dll" "$(OutDir)"</Command>
+      <Message>Copying required DLLs to $(OutDir)</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\AbstractScene.cpp" />
     <ClCompile Include="src\arcball_camera.cpp" />

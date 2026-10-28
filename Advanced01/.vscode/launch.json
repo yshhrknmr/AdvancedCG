@@ -1,0 +1,25 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run Advanced01",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "args": [],
+            "stopAtEntry": false,
+            "type": "cppdbg",
+            "program": "${workspaceFolder}/src/advanced01",
+            "cwd": "${workspaceFolder}/src",
+            "MIMode": "gdb",
+            "windows": {
+                "type": "cppvsdbg",
+                "program": "${workspaceFolder}/x64/Release/Advanced01.exe",
+                "cwd": "${workspaceFolder}",
+                "console": "integratedTerminal"
+            },
+            "osx": {
+                "MIMode": "lldb"
+            }
+        }
+    ]
+}

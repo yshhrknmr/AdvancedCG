@@ -1,6 +1,7 @@
-# Visual Studio Code から Visual Studio 2022 (または Build Tools) の MSBuild を呼び出して
-# .vcxproj をビルドするためのスクリプトです。
-# ビルド後イベントにより、必要な DLL は実行ファイルと同じフォルダに自動でコピーされます。
+# Builds a .vcxproj with the MSBuild of Visual Studio 2022 (or Build Tools) from Visual Studio Code.
+# The post-build event copies the required DLLs next to the executable.
+# NOTE: Keep this file ASCII-only. Windows PowerShell 5.1 reads BOM-less files as ANSI (CP932),
+#       which breaks parsing if the file contains non-ASCII characters.
 param(
     [Parameter(Mandatory = $true)][string]$Project,
     [string]$Configuration = "Release",
@@ -10,13 +11,13 @@ param(
 
 $vswhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
 if (-not (Test-Path $vswhere)) {
-    Write-Error "vswhere.exe が見つかりません。Visual Studio 2022 (C++ によるデスクトップ開発) をインストールしてください。"
+    Write-Error "vswhere.exe not found. Install Visual Studio 2022 or Build Tools for Visual Studio 2022 with the 'Desktop development with C++' workload."
     exit 1
 }
 
 $msbuild = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild -find "MSBuild\**\Bin\MSBuild.exe" | Select-Object -First 1
 if (-not $msbuild) {
-    Write-Error "MSBuild.exe が見つかりません。Visual Studio 2022 (C++ によるデスクトップ開発) をインストールしてください。"
+    Write-Error "MSBuild.exe not found. Install Visual Studio 2022 or Build Tools for Visual Studio 2022 with the 'Desktop development with C++' workload."
     exit 1
 }
 

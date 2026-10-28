@@ -12,6 +12,9 @@
 
 #include "tinyfiledialogs.h"
 
+#include "ScreenshotSaver.h"
+#include <string>
+
 #include <IL/il.h>
 #include <IL/ilu.h>
 #include <IL/ilut.h>
@@ -35,6 +38,9 @@
 
 using namespace std;
 using namespace glm;
+
+// file name of the image to be saved in the next frame (empty if none)
+std::string g_SaveImageFilename;
 
 int g_WindowWidth = 800, g_WindowHeight = 800;
 
@@ -295,6 +301,13 @@ int main() {
 
 		CHECK_GL_ERROR;
 
+		// save the rendered scene before ImGui is drawn so that the GUI is not captured
+		if (!g_SaveImageFilename.empty())
+		{
+			SaveScreenshot(g_SaveImageFilename.c_str());
+			g_SaveImageFilename.clear();
+		}
+
 		ImGui_ImplOpenGL2_NewFrame();
 		//ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
@@ -308,6 +321,17 @@ int main() {
 
 			ImGui::Checkbox("Display XYZ Axes", &displayXYZAxes);
 			ImGui::Checkbox("Display Wireframe", &displayWireframe);
+
+			if (ImGui::Button("Save Image"))
+			{
+				char const* lFilterPatterns[] = { "*.png", "*.jpg", "*.bmp" };
+				const char* lTheSaveFileName = tinyfd_saveFileDialog(
+					"Saving the rendered image", "result.png", 3, lFilterPatterns, "Image (*.png;*.jpg;*.bmp)");
+
+				// the image is saved in the next frame, after the scene is drawn
+				if (lTheSaveFileName)
+					g_SaveImageFilename = lTheSaveFileName;
+			}
 
 			ImGui::Separator();
 

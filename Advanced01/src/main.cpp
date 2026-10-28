@@ -9,6 +9,9 @@
 // for cross-platform file dialogs
 #include "tinyfiledialogs.h"
 
+#include "ScreenshotSaver.h"
+#include <string>
+
 // for DevIL, image I/O library
 #include <IL/il.h>
 #include <IL/ilu.h>
@@ -21,6 +24,9 @@
 #include "Scene05EnvironmentMapping.h"
 
 using namespace std;
+
+// file name of the image to be saved in the next frame (empty if none)
+std::string g_SaveImageFilename;
 
 // scene entries
 
@@ -170,6 +176,13 @@ int main(int argc, char **argv)
 
 		g_SceneEntries[g_SceneIndex].Draw();
 
+		// save the rendered scene before ImGui is drawn so that the GUI is not captured
+		if (!g_SaveImageFilename.empty())
+		{
+			SaveScreenshot(g_SaveImageFilename.c_str());
+			g_SaveImageFilename.clear();
+		}
+
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
@@ -179,6 +192,17 @@ int main(int argc, char **argv)
 			ImGui::Begin("ImGui Window");
 
 			ImGui::Text("Framerate: %.3f ms/frame (%.1f fps)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+
+			if (ImGui::Button("Save Image"))
+			{
+				char const* lFilterPatterns[] = { "*.png", "*.jpg", "*.bmp" };
+				const char* lTheSaveFileName = tinyfd_saveFileDialog(
+					"Saving the rendered image", "result.png", 3, lFilterPatterns, "Image (*.png;*.jpg;*.bmp)");
+
+				// the image is saved in the next frame, after the scene is drawn
+				if (lTheSaveFileName)
+					g_SaveImageFilename = lTheSaveFileName;
+			}
 
 			if (ImGui::BeginListBox("Scenes", ImVec2(0, ImGui::GetTextLineHeightWithSpacing() * g_NumSceneEntries * 1.05)))	// 1.05 for padding
 			{

@@ -46,6 +46,9 @@
     <ClCompile Include="src\CheckGLError.cpp">
       <Filter>Util</Filter>
     </ClCompile>
+    <ClCompile Include="src\ScreenshotSaver.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
     <ClCompile Include="src\tinyfiledialogs.cpp">
       <Filter>Util</Filter>
     </ClCompile>
@@ -106,6 +109,9 @@
       <Filter>Util</Filter>
     </ClInclude>
     <ClInclude Include="src\CheckGLError.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ScreenshotSaver.h">
       <Filter>Util</Filter>
     </ClInclude>
     <ClInclude Include="src\tinyfiledialogs.h">

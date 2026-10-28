@@ -140,6 +140,7 @@ xcopy /y /d /q "$(ProjectDir)..\vc-x64-libs\glfw-3.3.8-lib-vc2022\*.dll" "$(OutD
     <ClCompile Include="src\AbstractScene.cpp" />
     <ClCompile Include="src\arcball_camera.cpp" />
     <ClCompile Include="src\CheckGLError.cpp" />
+    <ClCompile Include="src\ScreenshotSaver.cpp" />
     <ClCompile Include="src\GLSLProgramObject.cpp" />
     <ClCompile Include="src\GLSLShaderObject.cpp" />
     <ClCompile Include="src\Image2OGLTexture.cpp" />
@@ -163,6 +164,7 @@ xcopy /y /d /q "$(ProjectDir)..\vc-x64-libs\glfw-3.3.8-lib-vc2022\*.dll" "$(OutD
     <ClInclude Include="src\AbstractScene.h" />
     <ClInclude Include="src\arcball_camera.h" />
     <ClInclude Include="src\CheckGLError.h" />
+    <ClInclude Include="src\ScreenshotSaver.h" />
     <ClInclude Include="src\fast_obj.h" />
     <ClInclude Include="src\GLSLProgramObject.h" />
     <ClInclude Include="src\GLSLShaderObject.h" />

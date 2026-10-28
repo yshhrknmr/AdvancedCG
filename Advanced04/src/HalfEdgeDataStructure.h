@@ -12,8 +12,8 @@ namespace HalfEdge {
 		Vertex() : pHalfEdge(nullptr), id(-1) {}
 		Vertex(int _id) : pHalfEdge(nullptr), id(_id) {}
 
-		int countValence() const;
-		bool onBoundary() const;
+		int countValence() const;	// number of edges connected to this vertex
+		bool onBoundary() const;	// true if one of the half-edges starting from this vertex has no pair (i.e., is on the boundary)
 
 		HalfEdge* pHalfEdge;
 		glm::vec3 position;
@@ -69,7 +69,7 @@ namespace HalfEdge {
 		void build(const PolygonMesh& mesh, bool checkConsistency = false);
 		void restore(PolygonMesh& mesh) const;
 
-		void checkDataConsistency() const;
+		void checkDataConsistency() const;	// prints warnings if the pointers of vertices, half-edges, and faces are inconsistent
 
 		Vertex* addVertex() { auto v = new Vertex(vertices.size()); vertices.push_back(v); return v; }
 		Face* addFace() { auto f = new Face(faces.size()); faces.push_back(f); return f; }
